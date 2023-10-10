@@ -1,0 +1,56 @@
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+a {
+    text-decoration: none;
+    color: var(--bs-table-striped-color);
+}
+
+a:hover {
+    color: var(--bs-table-striped-color);
+    opacity: 0.8;
+}
+
+.errorlist {
+    display: none;
+}
+
+.sign {
+    max-width: 500px;
+}
+
+.sign-form {
+    border-radius: 10px;
+}
+
+.registration > div, .auth > div {
+    width: 100%;
+}
+
+.registration > div p, .auth > div p {
+    margin-bottom: 0;
+}
+
+.sign label {
+    color: white;
+    margin-bottom: 5px;
+}
+
+.note {
+    background: #eee;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.note a {
+    text-decoration: underline;
+}
