@@ -20,8 +20,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'booking',
-    'users',
+    'apps.booking',
+    'apps.users',
 ]
 
 MIDDLEWARE = [
@@ -113,3 +113,5 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
+
+LOGIN_URL = '/users/login/'

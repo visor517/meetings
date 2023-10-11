@@ -1,10 +1,11 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
-from booking.views import ReservationListView
+from apps.booking.views import ReservationListView
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', ReservationListView.as_view(), name="index"),
+    path("admin/", admin.site.urls),
+    path("", ReservationListView.as_view(), name="index"),
+    path("users/", include("apps.users.urls", namespace="users")),
 ]

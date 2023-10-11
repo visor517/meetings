@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Личный кабинет | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Лого</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Главная</a>
+        </li>
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+              <a class="nav-link" href="{% url 'users:profile' %}">{{ user.username }}<i class="fas fa-user-circle"></i></a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link" href="{% url 'users:logout' %}">Выйти <i class="fas fa-sign-out-alt"></i></a>
+          </li>
+      {% else %}
+          <li class="nav-item">
+              <a class="nav-link" href="{% url 'users:login' %}">Войти <i class="fas fa-sign-in-alt"></i></a>
+          </li>
+      {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-3 px-0">
+  <div class="row row-cols-2">
+    <div class="col col-3">
+      <form class="card p-3">
+        <label class="form-label text-start">Название комнаты</label>
+        <select class="form-select" aria-label="Пример выбора по умолчанию">
+          {% for room in rooms %}
+          <option value="{{ room.id }}">{{ room.name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary mt-3">Ввод</button>
+      </form>
+    </div>
+    <div class="col col-9">
+      <table class="table table-primary">
+        <thead>
+          <tr>
+            <th scope="col">Зарезервировал</th>
+            <th scope="col">С</th>
+            <th scope="col">До</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for reservation in reservation_list %}
+          <tr id="{{ reservation.pk }}">
+            <td scope="row">{{ reservation.owner }}</td>
+            <td>{{ reservation.start_time }}</td>
+            <td>{{ reservation.finish_time }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
