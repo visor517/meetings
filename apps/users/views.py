@@ -1,87 +1,82 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib import auth, messages
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse
+from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import (
+    LoginView as BasedLoginView, PasswordResetView as BasedPasswordResetView,
+    PasswordResetConfirmView as BasePasswordResetConfirmView, PasswordChangeView as BasePasswordChangeView)
+from django.urls import reverse, reverse_lazy
 from django.conf import settings
 from django.core.mail import send_mail
+from django.views.generic import CreateView, FormView
 
-from .forms import UserLoginForm, UserRegistrationForm, UserProfileForm
-from .models import User
+from apps.users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+from apps.users.models import User
 
 
-def login(request):
-    if request.method == 'POST':
-        form = UserLoginForm(data=request.POST)
+class LoginView(BasedLoginView):
+    """ Авторизация """
+    form_class = UserLoginForm
+    template_name = "users/login.html"
+
+
+class RegistrationView(CreateView):
+    """ Регистрация """
+    form_class = UserRegistrationForm
+    success_url = reverse_lazy("index")
+    template_name = "users/registration.html"
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("accounts"))
+        return super(RegistrationView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        context = {"form": form}
         if form.is_valid():
-            username = request.POST['username']
-            password = request.POST['password']
-            user = auth.authenticate(username=username, password=password)
-            if user and user.is_active:
-                auth.login(request, user)
-                return HttpResponseRedirect(reverse('index'))
-    else:
-        form = UserLoginForm()
-    context = {'title': 'Авторизация', 'form': form}
-    return render(request, 'users/login.html', context)
+            data = form.cleaned_data
+            username = data.pop("username")
+            user = User.objects.create(username=username)
+            user.set_password(data.pop("password"))
+            user.save()
+            login(self.request, user)
+            return HttpResponseRedirect(reverse("accounts"))
+
+        context["messages"] = [item[0] for item in form.errors.values()]
+        return render(request, self.template_name, context)
 
 
-def register(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(data=request.POST)
-        if form.is_valid():
-            user = form.save()
-            # if send_verify_mail(user):
-            #     messages.warning(request, 'На почту отправлена ссылка для подтверждения!')
-            return HttpResponseRedirect(reverse('users:login'))
-    else:
-        form = UserRegistrationForm()
+class ProfileView(LoginRequiredMixin, FormView):
+    """ Личный кабинет для партнера """
+    redirect_field_name = 'next'
 
-    context = {
-        'title': 'Регистрация',
-        'form': form,
-    }
-    return render(request, 'users/register.html', context)
+    form_class = UserProfileForm
+    template_name = 'users/profile.html'
 
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        form_class = UserProfileForm(instance=user)
+        context = {
+            'form': form_class,
+        }
+        return render(request, self.template_name, context)
 
-def logout(request):
-    auth.logout(request)
-    return HttpResponseRedirect(reverse('index'))
+    def post(self, request, *args, **kwargs):
+        user = request.user
 
-
-@login_required
-def profile(request):
-    user = request.user
-    if request.method == 'POST':
-        form = UserProfileForm(instance=user, files=request.FILES, data=request.POST)
+        form = UserProfileForm(instance=user, data=request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Данные успешно изменены!')
-            return HttpResponseRedirect(reverse('users:profile'))
+            if form.has_changed():
+                user = User.objects.get(username=user)
+                user.save()
+            message = {"status": True, "message": "Данные успешно изменены!"}
         else:
-            messages.warning(request, 'Что-то пошло не так с валидацией!')
-            return HttpResponseRedirect(reverse('users:profile'))
-    else:
-        form = UserProfileForm(instance=user)
-    context = {
-        'title': 'GeekShop - Личная страница',
-        'form': form,
-    }
-    return render(request, 'users/profile.html', context)
+            message = {"status": False, "message": "Что-то пошло не так с валидацией!"}
 
-
-def verify(request, email, activation_key):
-    user = User.objects.filter(email=email).first()
-    if user:
-        if user.activation_key == activation_key and not user.is_activation_key_expired():
-            user.is_active = True
-            user.save()
-            auth.login(request, user)
-        return render(request, 'users/verify.html', {'title': 'Верификация'})
-    return HttpResponseRedirect(reverse('index'))
-
-
-def send_verify_mail(user):
-    subject = 'Verify your account'
-    link = reverse('users:verify', args=[user.email, user.activation_key])
-    message = f'{settings.DOMAIN}{link}'
-    return send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email], fail_silently=False)
+        context = {
+            "form": form,
+            "message": message
+        }
+        return render(request, self.template_name, context)

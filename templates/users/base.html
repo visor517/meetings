@@ -19,20 +19,10 @@
 </div>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
 <script>
-    (function ($) {
-        "use strict";
-        var path = window.location.href; // because the 'href' property of the DOM element is the absolute path
-        $("#layoutSidenav_nav .sb-sidenav a.nav-link").each(function () {
-            if (this.href === path) {
-                $(this).addClass("active");
-            }
-        });
-
-        // Toggle the side navigation
-        $("#sidebarToggle").on("click", function (e) {
-            e.preventDefault();
-            $("body").toggleClass("sb-sidenav-toggled");
-        });
-    })(jQuery);</script>
+    // Закрытие блока с сообщениями
+    document.getElementById("alertClose").addEventListener("click", function() {
+        document.getElementById("alertBox").style.display = "none";
+    });
+</script>
 </body>
 </html>
