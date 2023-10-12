@@ -30,19 +30,61 @@
   </div>
 </nav>
 
+{# Окно для добавления записи #}
+<div class="modal fade" id="addBookingModal" tabindex="-1" aria-labelledby="addBookingModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-3">
+        <form action="{% url 'booking:reservation' %}" method="post">
+          {% csrf_token %}
+          <h4>{{ room.name }}</h4>
+          <input type="hidden" name="room" value="{{ room.id }}">
+          <input type="hidden" name="owner" value="{{ user.id }}">
+          <div class="form-group">
+            <label class="small mb-1" for="{{ add_form.start_time.if_for_label }}">От</label>
+            {{ add_form.start_time }}
+          </div>
+          <div class="form-group">
+            <label class="small mb-1" for="{{ add_form.finish_time.if_for_label }}">До</label>
+            {{ add_form.finish_time }}
+          </div>
+          <div class="form-group">
+            <label class="small mb-1" for="{{ add_form.description.if_for_label }}">Описание</label>
+            {{ add_form.description }}
+          </div>
+          <div class="d-flex justify-content-between mt-4 mb-0">
+            <button type="submit" class="btn btn-primary btn-add">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container mt-3 px-0">
   <div class="row row-cols-2">
     <div class="col col-3">
-      <form class="card p-3">
-        <label class="form-label text-start">Название комнаты</label>
-        <select class="form-select" aria-label="Пример выбора по умолчанию">
-          {% for room in rooms %}
-          <option value="{{ room.id }}">{{ room.name }}</option>
-          {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-primary mt-3">Ввод</button>
-      </form>
+      <div class="card shadow-lg p-3">
+        <form>
+          <label class="form-label text-start">Название комнаты</label>
+          <select class="form-select" aria-label="Пример выбора по умолчанию">
+            {% for room in rooms %}
+            <option value="{{ room.id }}">{{ room.name }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-primary mt-3 w-100">Поиск</button>
+        </form>
+      </div>
+
+      <div class="card shadow-lg p-3 mt-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#addBookingModal">Добавить</button>
+      </div>
     </div>
+
     <div class="col col-9">
       <table class="table table-primary">
         <thead>
@@ -65,4 +107,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block script %}
+    {% csrf_token %}
+
 {% endblock %}

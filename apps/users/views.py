@@ -1,13 +1,8 @@
 from django.shortcuts import render, HttpResponseRedirect
-from django.contrib import auth, messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import (
-    LoginView as BasedLoginView, PasswordResetView as BasedPasswordResetView,
-    PasswordResetConfirmView as BasePasswordResetConfirmView, PasswordChangeView as BasePasswordChangeView)
+from django.contrib.auth.views import LoginView as BasedLoginView
 from django.urls import reverse, reverse_lazy
-from django.conf import settings
-from django.core.mail import send_mail
 from django.views.generic import CreateView, FormView
 
 from apps.users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
