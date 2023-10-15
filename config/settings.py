@@ -20,6 +20,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'crispy_bootstrap5',
+    'crispy_forms',
+
     'apps.booking',
     'apps.users',
 ]
@@ -115,3 +119,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOGIN_URL = '/users/login/'
+
+# Form style settings
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

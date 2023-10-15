@@ -1,21 +1,10 @@
 {% extends 'users/base.html' %}
-
+{% load crispy_forms_tags %}
 {% block content %}
     <main>
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-5">
-                    {% if messages %}
-                    <div id="alertBox" class="alert alert-warning alert-dismissible fade show"
-                         role="alert" style="margin-top: 50px;">
-                        <uL>
-                        {% for message in messages %}
-                            <li>{{ message }}</li>
-                        {% endfor %}
-                        </uL>
-                        <button id="alertClose" type="button" class="btn-close" aria-label="Close"></button>
-                    </div>
-                    {% endif %}
                     <div class="card shadow-lg border-0 rounded-lg mt-5">
                         <div class="card-header">
                             <h3 class="text-center font-weight-light my-4">Создать аккаунт</h3>
@@ -23,31 +12,7 @@
                         <div class="card-body">
                             <form action="{% url 'users:registration' %}" method="post">
                                 {% csrf_token %}
-                                <div class="form-group">
-                                    <label class="small mb-1" for="{{ form.first_name.if_for_label }}">Имя</label>
-                                    {{ form.first_name }}
-                                </div>
-                                <div class="form-group">
-                                    <label class="small mb-1" for="{{ form.last_name.if_for_label }}">Фамилия</label>
-                                    {{ form.last_name }}
-                                </div>
-                                <div class="form-group">
-                                    <label class="small mb-1" for="{{ form.username.if_for_label }}">Имя пользователя</label>
-                                    {{ form.username }}
-                                </div>
-                                <div class="form-group">
-                                    <label class="small mb-1" for="{{ form.email.if_for_label }}">Адрес электронной почты</label>
-                                    {{ form.email }}
-                                </div>
-                                <div class="form-group">
-                                    <label class="small mb-1" for="{{ form.password1.if_for_label }}">Пароль</label>
-                                    {{ form.password1 }}
-                                </div>
-                                <div class="form-group">
-                                    <label class="small mb-1" for="{{ form.password2.if_for_label }}">Подтверждение
-                                        пароля</label>
-                                    {{ form.password2 }}
-                                </div>
+                                {{ form|crispy }}
                                 <div class="d-flex justify-content-between mt-4 mb-0">
                                     <input class="btn btn-primary btn-block" type="submit" value="Создать аккаунт">
                                     <a href="{% url 'index' %}" class="btn btn-secondary" role="button">Отмена</a>
