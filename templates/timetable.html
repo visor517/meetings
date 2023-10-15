@@ -8,7 +8,7 @@
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">Лого</a>
+    <a class="navbar-brand" href="{% url 'index' %}">Лого</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Переключатель навигации">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -39,23 +39,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body py-3">
-        <form action="{% url 'booking:reservation' %}" method="post">
+        <form id="addForm" action="{% url 'booking:reservation' %}" method="post">
           {% csrf_token %}
-          <h4>{{ room.name }}</h4>
-          <input type="hidden" name="room" value="{{ room.id }}">
-          <input type="hidden" name="owner" value="{{ user.id }}">
-          <div class="form-group">
-            <label class="small mb-1" for="{{ add_form.start_time.if_for_label }}">От</label>
-            {{ add_form.start_time }}
-          </div>
-          <div class="form-group">
-            <label class="small mb-1" for="{{ add_form.finish_time.if_for_label }}">До</label>
-            {{ add_form.finish_time }}
-          </div>
-          <div class="form-group">
-            <label class="small mb-1" for="{{ add_form.description.if_for_label }}">Описание</label>
-            {{ add_form.description }}
-          </div>
+          <h4>Резервируем время</h4>
+            {{ add_form|crispy }}
+          <div id="add-form-messages" class="text-danger"></div>
           <div class="d-flex justify-content-between mt-4 mb-0">
             <button type="submit" class="btn btn-primary btn-add">Добавить</button>
           </div>
@@ -75,10 +63,12 @@
         </form>
       </div>
 
+      {% if user.is_authenticated %}
       <div class="card shadow-lg p-3 mt-3">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                 data-bs-target="#addBookingModal">Добавить</button>
       </div>
+      {% endif %}
     </div>
 
     <div class="col col-9">
@@ -115,6 +105,36 @@
 {% endblock %}
 
 {% block script %}
-    {% csrf_token %}
+<script>
+  // Ограничение выбора минут в поле выбора времени
+  const datetimeInputs = document.querySelectorAll('input[type="datetime-local"]');
+  datetimeInputs.forEach(input => {
+    input.addEventListener('input', () => {
+      const date = new Date(input.value);
+      const minutes = date.getMinutes();
+      if (minutes % 5 !== 0) {
+        date.setMinutes(minutes - (minutes % 5));
+        input.value = date.toISOString().slice(0, 16);
+      }
+    });
+  });
 
+  // Отправка резервирования
+  $("#addForm").submit(function(e){
+            e.preventDefault()
+            $.ajax({
+                url: "{% url 'booking:reservation' %}",
+                type: "post",
+                data: $(this).serialize(),
+                success:function(data){
+                    if (data["success"]) {
+                        window.open("{% url 'index' %}")
+                    }
+                    else {
+                        $("#add-form-messages").html(data["message"])
+                    }
+                }
+            })
+        })
+</script>
 {% endblock %}

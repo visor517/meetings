@@ -1,7 +1,7 @@
 from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 
@@ -14,6 +14,7 @@ class ReservationListView(ListView):
     template_name = "timetable.html"
 
     def get_context_data(self, *args, **kwargs):
+        user = self.request.user
         params = self.request.GET
         if not (table_day := params.get("table_day")):
             table_day = date.today().strftime("%Y-%m-%d")
@@ -26,7 +27,10 @@ class ReservationListView(ListView):
             "time_table_form": TimeTableForm(initial={
                 "room_id": room.id,
                 "table_day": table_day}),
-            "add_form": ReservationForm,
+            "add_form": ReservationForm(initial={
+                "room": room,
+                "owner": user,
+            }),
             "room": room,
         })
         return context
@@ -44,15 +48,19 @@ class ReservationListView(ListView):
             return None
 
 
-class ReservationView(CreateView):
+class ReservationCreateView(CreateView):
     form_class = ReservationForm
-    success_url = reverse_lazy("index")
 
     def post(self, request, *args, **kwargs):
+
         form = self.form_class(request.POST)
+
         if form.is_valid():
             data = form.cleaned_data
             reservation = Reservation.objects.create(**data)
-            print()
+            url = f"{reverse_lazy('index')}/?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
+            return HttpResponseRedirect(url)
 
-        return HttpResponseRedirect(reverse('index'))
+        errors = form.errors
+
+        return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})

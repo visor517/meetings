@@ -6,5 +6,5 @@ from apps.booking.views import *
 app_name = "booking"
 
 urlpatterns = [
-    path("reservation/", ReservationView.as_view(), name="reservation"),
+    path("reservation/", ReservationCreateView.as_view(), name="reservation"),
 ]

@@ -1,15 +1,26 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 from apps.booking.models import Reservation, Room
 
 
 class ReservationForm(forms.ModelForm):
-    start_time = forms.DateTimeField(widget=forms.DateTimeInput(
-        attrs={"type": "datetime-local", "class": "form-control"}))
-    finish_time = forms.DateTimeField(widget=forms.DateTimeInput(
-        attrs={"type": "datetime-local", "class": "form-control"}))
-    description = forms.CharField(widget=forms.TextInput(
-        attrs={"class": "form-control", "placeholder": "Введите описание"}))
+    start_time = forms.DateTimeField(
+        label="Начало",
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": "300"}),
+        )
+    finish_time = forms.DateTimeField(
+        label="Окончание",
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": "300"}),
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get("start_time")
+        finish_time = cleaned_data.get("finish_time")
+        if start_time and finish_time and start_time >= finish_time:
+            self.add_error(None, "Окончание должно быть больше начала")
+        return cleaned_data
 
     class Meta:
         model = Reservation

@@ -20,7 +20,7 @@ class Reservation(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Зарезервировал")
     start_time = models.DateTimeField(db_index=True, verbose_name="Время начала")
     finish_time = models.DateTimeField(verbose_name="Время окончания")
-    description = models.CharField(max_length=1023, blank=True, null=True, verbose_name="Описание")
+    description = models.CharField(max_length=1023, default="Нет описания", verbose_name="Описание")
 
     class Meta:
         verbose_name = "Бронирование"
