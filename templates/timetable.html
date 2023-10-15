@@ -70,12 +70,7 @@
     <div class="col col-3">
       <div class="card shadow-lg p-3">
         <form>
-          <label class="form-label text-start">Название комнаты</label>
-          <select class="form-select" aria-label="Пример выбора по умолчанию">
-            {% for room in rooms %}
-            <option value="{{ room.id }}">{{ room.name }}</option>
-            {% endfor %}
-          </select>
+          {{ time_table_form|crispy }}
           <button type="submit" class="btn btn-primary mt-3 w-100">Поиск</button>
         </form>
       </div>
@@ -99,12 +94,7 @@
         <tbody>
         {% for reservation in reservation_list %}
           <tr id="{{ reservation.pk }}" class="align-middle">
-            <td>
-              <div>
-                <div>{{ reservation.start_time|date }}</div>
-                <div>{{ reservation.start_time|time }} - {{ reservation.finish_time|time }}</div>
-              </div>
-            </td>
+            <td>{{ reservation.start_time|time }} - {{ reservation.finish_time|time }}</td>
             <td scope="row">{{ reservation.owner }}</td>
             <td>{{ reservation.description }}</td>
             <td class="text-end">
