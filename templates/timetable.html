@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% block title %}
-    Личный кабинет | {{ block.super }}
+    Расписание {{ room.name }} на {{ room_day }}
 {% endblock %}
 
 {% block content %}
@@ -89,17 +90,31 @@
       <table class="table table-primary">
         <thead>
           <tr>
+            <th scope="col">Время</th>
             <th scope="col">Зарезервировал</th>
-            <th scope="col">С</th>
-            <th scope="col">До</th>
+            <th scope="col">Описание</th>
+            <th scope="col"></th>
           </tr>
         </thead>
         <tbody>
         {% for reservation in reservation_list %}
-          <tr id="{{ reservation.pk }}">
+          <tr id="{{ reservation.pk }}" class="align-middle">
+            <td>
+              <div>
+                <div>{{ reservation.start_time|date }}</div>
+                <div>{{ reservation.start_time|time }} - {{ reservation.finish_time|time }}</div>
+              </div>
+            </td>
             <td scope="row">{{ reservation.owner }}</td>
-            <td>{{ reservation.start_time }}</td>
-            <td>{{ reservation.finish_time }}</td>
+            <td>{{ reservation.description }}</td>
+            <td class="text-end">
+              <button class="btn btn-secondary" type="button" disabled>
+                <img src="{% static 'icons/pencil-square.svg' %}" width="16" height="16" alt="Править"/>
+              </button>
+              <button class="btn btn-secondary" type="button" disabled>
+                <img src="{% static 'icons/trash.svg' %}" width="16" height="16" alt="Удалить"/>
+              </button>
+            </td>
           </tr>
         {% endfor %}
         </tbody>
