@@ -83,17 +83,20 @@
         </thead>
         <tbody>
         {% for reservation in reservation_list %}
-          <tr id="{{ reservation.pk }}" class="align-middle">
+          <tr id="reservation-{{ reservation.pk }}" class="align-middle">
             <td>{{ reservation.start_time|time }} - {{ reservation.finish_time|time }}</td>
             <td scope="row">{{ reservation.owner }}</td>
             <td>{{ reservation.description }}</td>
             <td class="text-end">
-              <button class="btn btn-secondary" type="button" disabled>
+              {% if user == reservation.owner %}
+              <button class="btn btn-primary" type="button">
                 <img src="{% static 'icons/pencil-square.svg' %}" width="16" height="16" alt="Править"/>
               </button>
-              <button class="btn btn-secondary" type="button" disabled>
+              {% csrf_token %}
+              <a class="btn btn-primary delButton" type="button" data-reserve-id="{{ reservation.id }}">
                 <img src="{% static 'icons/trash.svg' %}" width="16" height="16" alt="Удалить"/>
-              </button>
+              </a>
+              {% endif %}
             </td>
           </tr>
         {% endfor %}
@@ -106,35 +109,38 @@
 
 {% block script %}
 <script>
-  // Ограничение выбора минут в поле выбора времени
-  const datetimeInputs = document.querySelectorAll('input[type="datetime-local"]');
-  datetimeInputs.forEach(input => {
-    input.addEventListener('input', () => {
-      const date = new Date(input.value);
-      const minutes = date.getMinutes();
-      if (minutes % 5 !== 0) {
-        date.setMinutes(minutes - (minutes % 5));
-        input.value = date.toISOString().slice(0, 16);
-      }
-    });
-  });
-
   // Отправка резервирования
   $("#addForm").submit(function(e){
-            e.preventDefault()
-            $.ajax({
-                url: "{% url 'booking:reservation' %}",
-                type: "post",
-                data: $(this).serialize(),
-                success:function(data){
-                    if (data["success"]) {
-                        window.open("{% url 'index' %}")
-                    }
-                    else {
-                        $("#add-form-messages").html(data["message"])
-                    }
-                }
-            })
-        })
+      e.preventDefault()
+      $.ajax({
+          url: "{% url 'booking:reservation' %}",
+          type: "post",
+          data: $(this).serialize(),
+          success:function(data){
+              if (data["success"]) {
+                  console.log(data["message"])
+                  window.open(data["message"])
+              }
+              else {
+                  $("#add-form-messages").html(data["message"])
+              }
+          }
+      })
+  })
+  // удаление записи
+  $(".delButton").click(function(e){
+    let reservation_id = $(this).data("reserve-id")
+    let url = "{% url 'booking:reservation-delete' reservation_id='res_id' %}".replace("res_id", reservation_id)
+    $.ajax({
+        url: url,
+        type: "get",
+        success:function(data){
+            if (data["success"]) {
+                console.log(data["message"])
+                $("#reservation-" + reservation_id).empty()
+            }
+        }
+    })
+  })
 </script>
 {% endblock %}

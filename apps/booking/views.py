@@ -3,7 +3,7 @@ from datetime import date
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, View
 
 from apps.booking.models import Reservation, Room
 from apps.booking.forms import ReservationForm, TimeTableForm
@@ -43,12 +43,12 @@ class ReservationListView(ListView):
         room_id = params.get("room_id", 1)
 
         try:
-            return Reservation.objects.filter(room_id=room_id, start_time__date=table_day)
+            return Reservation.objects.filter(room_id=room_id, start_time__date=table_day).order_by("start_time")
         except ObjectDoesNotExist:
             return None
 
 
-class ReservationCreateView(CreateView):
+class ReservationView(View):
     form_class = ReservationForm
 
     def post(self, request, *args, **kwargs):
@@ -58,9 +58,20 @@ class ReservationCreateView(CreateView):
         if form.is_valid():
             data = form.cleaned_data
             reservation = Reservation.objects.create(**data)
-            url = f"{reverse_lazy('index')}/?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
-            return HttpResponseRedirect(url)
+            url = f"{reverse_lazy('index')}?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
+            return JsonResponse({"success": True, "message": url})
 
         errors = form.errors
 
         return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})
+
+    def delete(self, request, *args, **kwargs):
+        print(self)
+
+
+class ReservationDeleteView(View):
+    def get(self, request, *args, **kwargs):
+        reservation_id = kwargs.get("reservation_id")
+        reservation = Reservation.objects.get(id=reservation_id)
+        reservation.delete()
+        return JsonResponse({"success": True})
