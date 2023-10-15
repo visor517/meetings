@@ -5,6 +5,7 @@ from apps.booking.models import Reservation, Room
 
 
 class ReservationForm(forms.ModelForm):
+    owner_id = forms.IntegerField(widget=forms.HiddenInput())
     start_time = forms.DateTimeField(
         label="Начало",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": "300"}),
@@ -25,6 +26,7 @@ class ReservationForm(forms.ModelForm):
     class Meta:
         model = Reservation
         fields = "__all__"
+        exclude = ["owner"]
 
 
 class TimeTableForm(forms.Form):

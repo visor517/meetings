@@ -29,7 +29,7 @@ class ReservationListView(ListView):
                 "table_day": table_day}),
             "add_form": ReservationForm(initial={
                 "room": room,
-                "owner": user,
+                "owner_id": user.id,
             }),
             "room": room,
         })
@@ -65,8 +65,10 @@ class ReservationView(View):
 
         return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})
 
-    def delete(self, request, *args, **kwargs):
-        print(self)
+    def get(self, request, *args, **kwargs):
+        data = request.data.GET
+
+        print()
 
 
 class ReservationDeleteView(View):

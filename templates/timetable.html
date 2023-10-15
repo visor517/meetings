@@ -43,7 +43,29 @@
           {% csrf_token %}
           <h4>Резервируем время</h4>
             {{ add_form|crispy }}
-          <div id="add-form-messages" class="text-danger"></div>
+          <div id="addFormMessages" class="text-danger"></div>
+          <div class="d-flex justify-content-between mt-4 mb-0">
+            <button type="submit" class="btn btn-primary btn-add">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Окно для редактирования записи #}
+<div class="modal fade" id="editBookingModal" tabindex="-1" aria-labelledby="addBookingModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-3">
+        <form id="editForm" action="{% url 'booking:reservation' %}" method="post">
+          {% csrf_token %}
+          <h4>Редактируем запись</h4>
+            {{ add_form|crispy }}
+          <div id="editFormMessages" class="text-danger"></div>
           <div class="d-flex justify-content-between mt-4 mb-0">
             <button type="submit" class="btn btn-primary btn-add">Добавить</button>
           </div>
@@ -89,10 +111,10 @@
             <td>{{ reservation.description }}</td>
             <td class="text-end">
               {% if user == reservation.owner %}
-              <button class="btn btn-primary" type="button">
-                <img src="{% static 'icons/pencil-square.svg' %}" width="16" height="16" alt="Править"/>
-              </button>
-              {% csrf_token %}
+              <a type="button" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#editBookingModal" data-reserve-id="{{ reservation.id }}">
+                  <img src="{% static 'icons/pencil-square.svg' %}" width="16" height="16" alt="Править"/>
+              </a>
               <a class="btn btn-primary delButton" type="button" data-reserve-id="{{ reservation.id }}">
                 <img src="{% static 'icons/trash.svg' %}" width="16" height="16" alt="Удалить"/>
               </a>
@@ -100,6 +122,9 @@
             </td>
           </tr>
         {% endfor %}
+        {% if not reservation_list %}
+        <tr><td colspan="4">Тут пусто. Попробуйте изменить поиск.</td></tr>
+        {% endif %}
         </tbody>
       </table>
     </div>
@@ -122,12 +147,12 @@
                   window.open(data["message"])
               }
               else {
-                  $("#add-form-messages").html(data["message"])
+                  $("#addFormMessages").html(data["message"])
               }
           }
       })
   })
-  // удаление записи
+  // Удаление записи
   $(".delButton").click(function(e){
     let reservation_id = $(this).data("reserve-id")
     let url = "{% url 'booking:reservation-delete' reservation_id='res_id' %}".replace("res_id", reservation_id)
@@ -142,5 +167,19 @@
         }
     })
   })
+  // Изменение записи
+  // $(".openEditButton").click(function(e){
+  //   let reservation_id = $(this).data("reserve-id")
+  //   $.ajax({
+  //       url: "{% url 'booking:reservation'%}",
+  //       type: "get",
+  //       success:function(data){
+  //           if (data["success"]) {
+  //               console.log(data["message"])
+  //               $("#reservation-" + reservation_id).empty()
+  //           }
+  //       }
+  //   })
+  // })
 </script>
 {% endblock %}
