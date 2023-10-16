@@ -16,27 +16,12 @@ class ReservationForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        room = cleaned_data.get("room")
         start_time = cleaned_data.get("start_time")
         finish_time = cleaned_data.get("finish_time")
         if start_time and finish_time and start_time >= finish_time:
             self.add_error(None, "Окончание должно быть больше начала")
         if start_time.date() != finish_time.date():
             self.add_error(None, "Даты должны совпадать")
-
-        if not self.errors:
-            # проверяем на свободность
-            if exist_intervals := Reservation.objects.exclude(id=cleaned_data.get("id")).filter(
-                        start_time__date=start_time.date(),
-                        room_id=room.id).order_by("start_time"
-                    ).values("start_time", "finish_time"):
-
-                for interval in exist_intervals:
-                    if finish_time <= interval["start_time"]:
-                        break
-                    if start_time < interval["finish_time"]:
-                        self.add_error(None, "Указанное время попадает в занятый интервал")
-                        break
 
         return cleaned_data
 

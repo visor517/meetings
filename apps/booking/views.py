@@ -1,4 +1,3 @@
-import datetime
 from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,7 +7,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from apps.booking.models import Reservation, Room
 from apps.booking.forms import ReservationForm, ReservationUpdateForm, TimeTableForm
-
+from apps.booking.utils import check_intervals
 
 class ReservationListView(ListView):
     model = Reservation
@@ -56,14 +55,14 @@ class ReservationCreateView(CreateView):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            data = form.cleaned_data
-            reservation = Reservation.objects.create(**data)
-            url = f"{reverse_lazy('index')}?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
-            return JsonResponse({"success": True, "message": url})
+            form = check_intervals(form)
+            if not form.errors:
+                data = form.cleaned_data
+                reservation = Reservation.objects.create(**data)
+                url = f"{reverse_lazy('index')}?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
+                return JsonResponse({"success": True, "message": url})
 
-        errors = form.errors
-
-        return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})
+        return JsonResponse({"success": False, "message": str(form.errors).replace("errorlist", "")})
 
 
 class ReservationUpdateView(UpdateView):
@@ -78,17 +77,21 @@ class ReservationUpdateView(UpdateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
+        form = self.get_form()
+        instance = self.get_object()
 
         if form.is_valid():
-            data = form.cleaned_data
-            reservation = Reservation.objects.create(**data)
-            url = f"{reverse_lazy('index')}?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
-            return JsonResponse({"success": True, "message": url})
+            form = check_intervals(form, instance.pk)
+            if not form.errors:
+                data = form.cleaned_data
+                reservation = form.save(commit=False)
+                reservation.id = instance.id
+                reservation.owner_id = data['owner_id']
+                reservation.save()
+                url = f"{reverse_lazy('index')}?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
+                return JsonResponse({"success": True, "message": url})
 
-        errors = form.errors
-
-        return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})
+        return JsonResponse({"success": False, "message": str(form.errors).replace("errorlist", "")})
 
 
 class ReservationDeleteView(DeleteView):
