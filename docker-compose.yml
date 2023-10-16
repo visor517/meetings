@@ -19,10 +19,9 @@ services:
     env_file:
       - .env
     command: bash -c "
-      ./wait-for-postgres.sh db &&
       python manage.py migrate &&
-      python manage.py loaddata recipes.json &&
-      python manage.py runserver 127.0.0.1:8000
+      python manage.py loaddata fixtures.json &&
+      python manage.py runserver 0.0.0.0:8000
       "
     depends_on:
       - db
