@@ -39,7 +39,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body py-3">
-        <form id="addForm" action="{% url 'booking:reservation' %}" method="post">
+        <form id="addForm" action="{% url 'reservations:create' %}" method="post">
           {% csrf_token %}
           <h4>Резервируем время</h4>
             {{ add_form|crispy }}
@@ -53,7 +53,7 @@
   </div>
 </div>
 
-{# Окно для редактирования записи #}
+{# Окно для изменения записи #}
 <div class="modal fade" id="editBookingModal" tabindex="-1" aria-labelledby="addBookingModal" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -61,13 +61,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body py-3">
-        <form id="editForm" action="{% url 'booking:reservation' %}" method="post">
+        <form id="editForm" action="#" method="post">
           {% csrf_token %}
-          <h4>Редактируем запись</h4>
-            {{ add_form|crispy }}
+          <h4>Резервируем время</h4>
+          <div id="editFormBody">Загружается...</div>
           <div id="editFormMessages" class="text-danger"></div>
           <div class="d-flex justify-content-between mt-4 mb-0">
-            <button type="submit" class="btn btn-primary btn-add">Добавить</button>
+            <button type="submit" class="btn btn-primary btn-add">Изменить</button>
           </div>
         </form>
       </div>
@@ -111,11 +111,11 @@
             <td>{{ reservation.description }}</td>
             <td class="text-end">
               {% if user == reservation.owner %}
-              <a type="button" class="btn btn-primary" data-bs-toggle="modal"
-                data-bs-target="#editBookingModal" data-reserve-id="{{ reservation.id }}">
+              <a type="button" class="btn btn-primary editButton" data-reserve-id="{{reservation.pk}}"
+                 data-bs-toggle="modal" data-bs-target="#editBookingModal">
                   <img src="{% static 'icons/pencil-square.svg' %}" width="16" height="16" alt="Править"/>
               </a>
-              <a class="btn btn-primary delButton" type="button" data-reserve-id="{{ reservation.id }}">
+              <a class="btn btn-primary delButton" type="button" data-reserve-id="{{ reservation.pk }}">
                 <img src="{% static 'icons/trash.svg' %}" width="16" height="16" alt="Удалить"/>
               </a>
               {% endif %}
@@ -138,12 +138,11 @@
   $("#addForm").submit(function(e){
       e.preventDefault()
       $.ajax({
-          url: "{% url 'booking:reservation' %}",
+          url: "{% url 'reservations:create' %}",
           type: "post",
           data: $(this).serialize(),
           success:function(data){
               if (data["success"]) {
-                  console.log(data["message"])
                   window.open(data["message"])
               }
               else {
@@ -152,34 +151,55 @@
           }
       })
   })
-  // Удаление записи
-  $(".delButton").click(function(e){
+
+  // Открытие формы изменений
+  $(".editButton").click(function(e){
     let reservation_id = $(this).data("reserve-id")
-    let url = "{% url 'booking:reservation-delete' reservation_id='res_id' %}".replace("res_id", reservation_id)
+    let url = "{% url 'reservations:update' pk='res_id' %}".replace("res_id", reservation_id)
     $.ajax({
         url: url,
         type: "get",
+        data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
         success:function(data){
-            if (data["success"]) {
-                console.log(data["message"])
-                $("#reservation-" + reservation_id).empty()
-            }
+            $("#editFormBody").html(data)
         }
     })
   })
-  // Изменение записи
-  // $(".openEditButton").click(function(e){
-  //   let reservation_id = $(this).data("reserve-id")
-  //   $.ajax({
-  //       url: "{% url 'booking:reservation'%}",
-  //       type: "get",
-  //       success:function(data){
-  //           if (data["success"]) {
-  //               console.log(data["message"])
-  //               $("#reservation-" + reservation_id).empty()
-  //           }
-  //       }
-  //   })
-  // })
+
+  // Отправка изменений резервирования
+  $("#editForm").submit(function(e){
+      e.preventDefault()
+      let reservation_id = $(this).data("reserve-id")
+      let url = "{% url 'reservations:update' pk='res_id' %}".replace("res_id", reservation_id)
+      console.log(url)
+      $.ajax({
+          url: url,
+          type: "post",
+          data: $(this).serialize(),
+          success:function(data){
+              if (data["success"]) {
+                  window.open(data["message"])
+              }
+              else {
+                  $("#editFormMessages").html(data["message"])
+              }
+          }
+      })
+  })
+
+  // Удаление записи
+  $(".delButton").click(function(e){
+    let reservation_id = $(this).data("reserve-id")
+    let url = "{% url 'reservations:delete' pk='res_id' %}".replace("res_id", reservation_id)
+    $.ajax({
+        url: url,
+        type: "post",
+        data: {csrfmiddlewaretoken: "{{ csrf_token }}"},
+        success:function(data){
+            $("#reservation-" + reservation_id).empty()
+        }
+    })
+  })
+
 </script>
 {% endblock %}

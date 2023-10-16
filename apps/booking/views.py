@@ -1,12 +1,13 @@
+import datetime
 from datetime import date
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, ListView, View
+from django.http import JsonResponse
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from apps.booking.models import Reservation, Room
-from apps.booking.forms import ReservationForm, TimeTableForm
+from apps.booking.forms import ReservationForm, ReservationUpdateForm, TimeTableForm
 
 
 class ReservationListView(ListView):
@@ -48,7 +49,7 @@ class ReservationListView(ListView):
             return None
 
 
-class ReservationView(View):
+class ReservationCreateView(CreateView):
     form_class = ReservationForm
 
     def post(self, request, *args, **kwargs):
@@ -65,15 +66,31 @@ class ReservationView(View):
 
         return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})
 
-    def get(self, request, *args, **kwargs):
-        data = request.data.GET
 
-        print()
+class ReservationUpdateView(UpdateView):
+    form_class = ReservationUpdateForm
+    model = Reservation
+    template_name = "reservations/update_form.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+            data = form.cleaned_data
+            reservation = Reservation.objects.create(**data)
+            url = f"{reverse_lazy('index')}?room_id={reservation.room_id}&table_day={reservation.start_time.date()}"
+            return JsonResponse({"success": True, "message": url})
+
+        errors = form.errors
+
+        return JsonResponse({"success": False, "message": str(errors).replace("errorlist", "")})
 
 
-class ReservationDeleteView(View):
-    def get(self, request, *args, **kwargs):
-        reservation_id = kwargs.get("reservation_id")
-        reservation = Reservation.objects.get(id=reservation_id)
-        reservation.delete()
-        return JsonResponse({"success": True})
+class ReservationDeleteView(DeleteView):
+    model = Reservation
+    success_url = reverse_lazy("index")

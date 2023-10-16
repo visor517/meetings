@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 
 from apps.booking.models import Reservation, Room
 
@@ -8,11 +7,11 @@ class ReservationForm(forms.ModelForm):
     owner_id = forms.IntegerField(widget=forms.HiddenInput())
     start_time = forms.DateTimeField(
         label="Начало",
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": "300"}),
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": 300}),
         )
     finish_time = forms.DateTimeField(
         label="Окончание",
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": "300"}),
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control", "step": 300}),
         )
 
     def clean(self):
@@ -27,6 +26,17 @@ class ReservationForm(forms.ModelForm):
         model = Reservation
         fields = "__all__"
         exclude = ["owner"]
+
+
+class ReservationUpdateForm(ReservationForm):
+    start_time = forms.DateTimeField(
+        label="Начало",
+        widget=forms.DateTimeInput(attrs={"type": "text", "class": "form-control"}),
+    )
+    finish_time = forms.DateTimeField(
+        label="Окончание",
+        widget=forms.DateTimeInput(attrs={"type": "text", "class": "form-control"}),
+    )
 
 
 class TimeTableForm(forms.Form):

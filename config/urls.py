@@ -7,6 +7,6 @@ from apps.booking.views import ReservationListView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", ReservationListView.as_view(), name="index"),
-    path("booking/", include("apps.booking.urls", namespace="booking")),
+    path("reservations/", include("apps.booking.urls", namespace="reservations")),
     path("users/", include("apps.users.urls", namespace="users")),
 ]

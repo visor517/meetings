@@ -6,6 +6,7 @@ from apps.booking.views import *
 app_name = "booking"
 
 urlpatterns = [
-    path("reservation/", ReservationView.as_view(), name="reservation"),
-    path("reservation/delete/<reservation_id>/", ReservationDeleteView.as_view(), name="reservation-delete"),
+    path("create/", ReservationCreateView.as_view(), name="create"),
+    path("update/<pk>/", ReservationUpdateView.as_view(), name="update"),
+    path("delete/<pk>/", ReservationDeleteView.as_view(), name="delete"),
 ]
