@@ -43,12 +43,21 @@ class ReservationUpdateForm(ReservationForm):
 
 
 class TimeTableForm(forms.Form):
-    room_id = forms.ChoiceField(
-        label="Название комнаты",
-        required=False,
-        widget=forms.Select(attrs={"class": "form-control"}),
-        choices=[(room.id, room.name) for room in Room.objects.all()],
-    )
+    try:
+        room_id = forms.ChoiceField(
+            label="Название комнаты",
+            required=False,
+            widget=forms.Select(attrs={"class": "form-control"}),
+            choices=[(room.id, room.name) for room in Room.objects.all()],
+        )
+    except Exception:
+        room_id = forms.ChoiceField(
+            label="Название комнаты",
+            required=False,
+            widget=forms.Select(attrs={"class": "form-control"}),
+            choices=[],
+        )
+
     table_day = forms.DateField(
         label="День",
         required=False,
