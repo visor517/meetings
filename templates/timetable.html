@@ -61,14 +61,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body py-3">
-        <form id="editForm" action="#" method="post">
+        <form id="editForm" action="/" method="post">
           {% csrf_token %}
           <h4>Резервируем время</h4>
           <div id="editFormBody">Загружается...</div>
-          <div id="editFormMessages" class="text-danger"></div>
-          <div class="d-flex justify-content-between mt-4 mb-0">
-            <button type="submit" class="btn btn-primary btn-add">Изменить</button>
-          </div>
         </form>
       </div>
     </div>
@@ -169,7 +165,7 @@
   // Отправка изменений резервирования
   $("#editForm").submit(function(e){
       e.preventDefault()
-      let reservation_id = $(this).data("reserve-id")
+      let reservation_id = $("#editButton").data("reserve-id")
       let url = "{% url 'reservations:update' pk='res_id' %}".replace("res_id", reservation_id)
       console.log(url)
       $.ajax({

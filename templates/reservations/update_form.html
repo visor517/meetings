@@ -1,2 +1,8 @@
 {% load crispy_forms_tags %}
+
 {{ form|crispy }}
+<div id="editFormMessages" class="text-danger"></div>
+<div class="d-flex justify-content-between mt-4 mb-0">
+    <button id="editButton" type="submit" class="btn btn-primary btn-add"
+    data-reserve-id="{{ reservation.pk }}">Изменить</button>
+</div>
