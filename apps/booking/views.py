@@ -20,12 +20,15 @@ class ReservationListView(ListView):
             table_day = date.today().strftime("%Y-%m-%d")
 
         room_id = params.get("room_id", 1)
-        room = Room.objects.get(id=room_id)
+        try:
+            room = Room.objects.get(id=room_id)
+        except ObjectDoesNotExist:
+            room = None
 
         context = super().get_context_data(*args, **kwargs)
         context.update({
             "time_table_form": TimeTableForm(initial={
-                "room_id": room.id,
+                "room_id": room_id,
                 "table_day": table_day}),
             "add_form": ReservationForm(initial={
                 "room": room,
