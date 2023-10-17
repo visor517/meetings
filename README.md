@@ -1,5 +1,7 @@
 # meetings
 
+## В ветке docker версия с docker-compose
+
 ### Настройка проекта
 Создайте `.env` файл в папке config
 ```bash
